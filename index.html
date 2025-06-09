@@ -1,0 +1,281 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Mon Entreprise</title>
+  <style>
+body {
+  margin: 0;
+  font-family: Arial, sans-serif;
+  line-height: 1.6;
+}
+
+header {
+  background: #222;
+  color: white;
+  padding: 20px;
+  text-align: center;
+  display: flex;
+  flex-direction: row;
+  gap: 20px;
+  vertical-align: middle;
+}
+
+header img{
+  border-radius: 100%;
+
+}
+
+.logo {
+  width: 100px;
+}
+
+.nav{
+  flex: 1;
+  align-content: center;
+  text-align: end;
+}
+
+.nav a:hover{
+  padding: 10px;
+  background-color: blanchedalmond;
+  color: black;
+  border-radius: 20px;
+}
+
+nav ul {
+  list-style: none;
+  padding: 0;
+}
+
+nav ul li {
+  display: inline-block;
+  margin: 10px;
+}
+
+nav ul li a {
+  color: white;
+  text-decoration: none;
+}
+
+section {
+  padding: 20px;
+}
+
+ul {
+  list-style: square inside;
+}
+
+.accueill{
+  background-color: rgb(246, 239, 228);
+  height: 300px;
+  text-align: center;
+}
+
+.accueill h1{
+  font-size: 50px;
+  text-align: center;
+}
+
+.accueill p{
+  font-size: 17px;
+}
+
+.apropos{
+  padding: 50px;
+  background-color: #f9f9f9;
+}
+
+.apropos h2{
+  font-size: 30px;
+}
+
+.contact{
+  text-align: center;
+}
+
+footer {
+  background: #222;
+  color: white;
+  text-align: center;
+  padding: 10px;
+}
+
+.services {
+  background-color: rgb(246, 239, 228);
+
+}
+
+.services-section {
+  padding: 40px;
+  background-color: #f9f9f9;
+  text-align: center;
+}
+
+.services h2{
+   font-size: 30px;
+}
+
+.services-section h2 {
+  font-size: 2em;
+  margin-bottom: 40px;
+}
+
+.button_P{
+  padding: 13px;
+  background-color: red;
+  border: none;
+  color: white;
+  width: 150px;
+  border-radius: 20px;
+  text-decoration: none;
+
+}
+
+.services-container {
+  display: flex;
+  justify-content: center;
+  gap: 30px;
+  flex-wrap: wrap;
+}
+
+.service-card {
+  width: 300px;
+}
+
+.service-card img {
+  width: 100%;
+  height: 200px;
+  object-fit: cover;
+  border-radius: 10px;
+}
+
+.service-card h3 {
+  margin-top: 15px;
+  font-size: 1.2em;
+}
+
+.service-card p {
+  font-size: 0.95em;
+  color: #555;
+}
+
+
+  </style>
+</head>
+<body>
+  <header>
+    <img src="logo.png" alt="Logo" class="logo">
+    <h1>AutoNova</h1>
+    <nav class="nav">
+      <ul>
+        <li><a href="#apropos">À propos</a></li>
+        <li><a href="#services">Services</a></li>
+        <li><a href="#Produit">Produit</a></li>
+        <li><a href="#contact">Contact</a></li>
+      </ul>
+    </nav>
+  </header>
+  <section class="accueill">
+    <h1>Bievenue sur AutoNova</h1>
+    <p> <b>AutoNova</b> est une entreprise innovante de vente de voiture de comfortable et luxueuses <br>
+    pour innover dans le present et le future </p>
+
+  </section>
+
+  <section class="apropos" id="apropos">
+    <h2>À propos</h2>
+    <p>Autonova est une entreprise visionnaire spécialisée dans la vente 
+      de voitures alliant innovation, technologie et durabilité. Fondée avec l’ambition de transformer
+      l’expérience automobile, Autonova ne se contente pas de vendre des véhicules – nous proposons une nouvelle façon de penser la mobilité.
+      Notre mission est claire : offrir aux conducteurs de demain des véhicules connectés, écologiques
+      et performants, tout en garantissant un service client exemplaire. Grâce à une plateforme
+      digitale intuitive, nos clients peuvent explorer notre large gamme de véhicules neufs 
+      et d’occasion, comparer les modèles, planifier des essais et même finaliser leur achat
+      en ligne. <br><br>
+      
+      Chez Autonova, nous croyons que l’avenir de l’automobile repose sur l’innovation. 
+      C’est pourquoi nous intégrons dans notre catalogue les dernières avancées en matière 
+      de voitures électriques, hybrides et autonomes. Nous travaillons en partenariat avec des 
+      marques de renom et des start-ups de la tech pour toujours proposer les solutions les plus
+       avant-gardistes. <br><br>
+      
+      Autonova, c’est plus qu’une entreprise automobile. C’est un mouvement vers une mobilité 
+      plus intelligente, plus responsable, et plus adaptée aux besoins d’aujourd’hui et de demain.
+      
+      </p>
+  </section>
+
+  <section class="services" id="services">
+    <h2>Nos services</h2>
+    <ol>
+      <li>
+        <b>Vente de véhicules innovants:</b><br>
+        Autonova propose une large gamme de voitures électriques, hybrides et connectées, 
+        sélectionnées pour leur performance, leur design et leur respect de l’environnement.
+      </li><br>
+      <li>
+        <b> Achat 100% en ligne:</b><br>
+        Grâce à notre plateforme intuitive, vous pouvez configurer, comparer et acheter votre 
+        voiture sans vous déplacer. Essai à domicile, livraison rapide, paiement sécurisé.
+      </li><br>
+      <li>
+        <b> Reprise et estimation instantanée:</b><br>
+        Obtenez en quelques clics une estimation fiable de votre ancien véhicule, et bénéficiez 
+        d’une reprise avantageuse, avec déduction directe sur votre nouvel achat.
+      </li><br>
+      <li>
+        <b> Entretien et services connectés:</b><br>
+        Bénéficiez d’un suivi intelligent de votre véhicule : diagnostic à distance, rappels 
+        d’entretien automatisés, et prise de rendez-vous en ligne avec nos ateliers partenaires.
+      </li><br>
+      
+    </ol>
+  </section>
+
+  <section class="services-section" id="Produit">
+    <h2>Produits</h2>
+    <div class="services-container">
+      
+      <div class="service-card">
+        <img src="roll.jpg" alt="Roll Royce">
+        <h3>Roll Royce</h3>
+        <p>Marque britannique de prestige, connue pour ses voitures ultra luxueuses et silencieuses.
+          Chaque modèle est un chef-d'œuvre artisanal, symbole de richesse et d’élégance.</p>
+      </div>
+  
+      <div class="service-card">
+        <img src="tun.jpg" alt="Tundra">
+        <h3>Tundra</h3>
+        <p>Pick-up japonais robuste, conçu pour le travail intense et les trajets tout-terrain.
+          Fiable, puissant et spacieux, il offre confort et utilité au quotidien.
+          
+          </p>
+      </div>
+  
+      <div class="service-card">
+        <img src="fer.jpg" alt="Férarri">
+        <h3>Férarri</h3>
+        <p>Voiture de sport italienne emblématique, alliant puissance, vitesse et design raffiné.
+          Elle incarne le luxe et la performance sur route comme sur circuit.</p>
+      </div>
+  
+    </div>
+    <a class="button_P" href="Produit.php" > Voir plus</a>
+    
+  </section>
+  
+
+
+  <section class="contact" id="contact">
+    <h2>Contact</h2>
+    <p>Email : autonova_entreprise@gmail.com</p>
+    <p>Tel : 657-86-79-65 / 695-25-18-39</p>
+  </section>
+
+  <footer>
+    <p>&copy; 2025 Entreprise X - Tous droits réservés.</p>
+  </footer>
+</body>
+</html>
