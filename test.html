@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Dashboard Médecin</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    }
+
+    body {
+      background-color: #f8f8f8;
+      display: flex;
+      height: 100vh;
+    }
+
+    .sidebar {
+      width: 250px;
+      background-color: rgb(120, 214, 183);
+      color: white;
+      padding: 20px;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+    }
+
+    .sidebar h2 {
+      margin-bottom: 30px;
+    }
+
+    .sidebar a {
+      color: white;
+      text-decoration: none;
+      margin: 10px 0;
+      display: block;
+      transition: 0.3s;
+    }
+
+    .sidebar a:hover {
+      text-decoration: underline;
+    }
+
+    .main {
+      flex-grow: 1;
+      padding: 30px;
+      background-color: white;
+      overflow-y: auto;
+    }
+
+    .header {
+      margin-bottom: 30px;
+    }
+
+    .header h1 {
+      color: rgb(120, 214, 183);
+    }
+
+    .cards {
+      display: flex;
+      gap: 20px;
+      margin-bottom: 30px;
+    }
+
+    .card {
+      flex: 1;
+      background-color: #f0fdf7;
+      border-left: 5px solid rgb(120, 214, 183);
+      padding: 20px;
+      border-radius: 8px;
+      box-shadow: 0 0 10px rgba(0,0,0,0.05);
+    }
+
+    .card h3 {
+      margin-bottom: 10px;
+      color: #333;
+    }
+
+    .rdv-section {
+      background-color: #fafafa;
+      border-radius: 8px;
+      padding: 20px;
+      box-shadow: 0 0 10px rgba(0,0,0,0.05);
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 10px;
+    }
+
+    table th, table td {
+      padding: 12px;
+      border-bottom: 1px solid #ccc;
+      text-align: left;
+    }
+
+    table th {
+      background-color: rgb(120, 214, 183);
+      color: white;
+    }
+
+    table tr:hover {
+      background-color: #f1f1f1;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="sidebar">
+    <div>
+      <h2>Dr. Interface</h2>
+      <a href="#">Dashboard</a>
+      <a href="rendezvous.php">Rendez-vous</a>
+      <a href="#">Messages</a>
+      <a href="#">Commentaires</a>
+      <a href="#">Statistiques</a>
+    </div>
+    <div>
+      <a href="#">Déconnexion</a>
+    </div>
+  </div>
+
+  <div class="main">
+    <div class="header">
+      <h1>Bienvenue Docteur</h1>
+      <p>Aperçu de vos consultations et activités</p>
+    </div>
+
+    <div class="cards">
+      <div class="card">
+        <h3>Consultations Aujourd'hui</h3>
+        <p id="nb-consultations">0 Rendez-vous</p>
+      </div>
+      <div class="card">
+        <h3>Messages Non Lus</h3>
+        <p>5 Messages</p>
+      </div>
+      <div class="card">
+        <h3>Note Moyenne</h3>
+        <p>4.7 / 5</p>
+      </div>
+    </div>
+
+    <div class="rdv-section">
+      <h2>Rendez-vous à venir</h2>
+      <table>
+        <thead>
+          <tr>
+            <th>Patient</th>
+            <th>Date & Heure</th>
+            <th>Type</th>
+            <th>Urgence</th>
+            <th>Statut</th>
+          </tr>
+        </thead>
+        <tbody id="rdv-body">
+          <!-- Les RDV du jour confirmés s'afficheront ici -->
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <script>
+    const rendezVous = [
+      {
+        patient: "Jean Dupont",
+        datetime: "2025-06-10T09:00",
+        type: "Domicile",
+        urgence: "Urgent",
+        statut: "Confirmé"
+      },
+      {
+        patient: "Marie Claire",
+        datetime: "2025-06-10T11:00",
+        type: "Hôpital",
+        urgence: "Normal",
+        statut: "En attente"
+      },
+      {
+        patient: "Paul Durand",
+        datetime: "2025-06-10T14:00",
+        type: "En ligne",
+        urgence: "Normal",
+        statut: "Confirmé"
+      },
+      {
+        patient: "Alice Morel",
+        datetime: "2025-06-11T09:00",
+        type: "Hôpital",
+        urgence: "Urgent",
+        statut: "Confirmé"
+      }
+    ];
+
+    const aujourdHui = new Date().toISOString().slice(0, 10); // format YYYY-MM-DD
+
+    const rdvAujourdHui = rendezVous.filter(rdv =>
+      rdv.datetime.startsWith(aujourdHui) && rdv.statut === "Confirmé"
+    );
+
+    // Met à jour le nombre de consultations
+    document.getElementById("nb-consultations").textContent = `${rdvAujourdHui.length} Rendez-vous`;
+
+    // Remplit le tableau
+    const rdvBody = document.getElementById("rdv-body");
+    rdvAujourdHui.forEach(rdv => {
+      const row = document.createElement("tr");
+      row.innerHTML = `
+        <td>${rdv.patient}</td>
+        <td>${rdv.datetime.replace("T", " ")}</td>
+        <td>${rdv.type}</td>
+        <td>${rdv.urgence}</td>
+        <td>${rdv.statut}</td>
+      `;
+      rdvBody.appendChild(row);
+    });
+  </script>
+
+</body>
+</html>
