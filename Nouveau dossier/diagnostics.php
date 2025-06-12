@@ -230,11 +230,29 @@ $image_medecin = $_SESSION['image_medecin'] ?? 'default.jpg';
         </div>
     </div>
 
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
     <script>
         function escapeHtml(text) {
             return text.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&#039;");
+        }
+
+        function nl2br(str) {
+            return str.replace(/(?:\r\n|\r|\n)/g, '<br>');
+        }
+
+        function loadConsultations() {
+            $.ajax({
+                url: 'fetch_data.php',
+                type: 'GET',
+                dataType: 'json',
+                success: function(response) {
+                    renderConsultations(response.consultations || []);
+                },
+                error: function() {
+                    $('#error-message').text('Erreur lors du chargement des consultations.');
+                }
+            });
         }
 
         function renderConsultations(consultations) {
@@ -259,7 +277,7 @@ $image_medecin = $_SESSION['image_medecin'] ?? 'default.jpg';
                             <strong><span class="material-icons" style="vertical-align: middle;">medication</span> ${escapeHtml(p.medicament)}</strong> (${escapeHtml(p.duree || '')})<br>
                             <em>Posologie :</em> ${nl2br(escapeHtml(p.posologie || ''))}<br>
                             <em>Conseils :</em> ${nl2br(escapeHtml(p.conseils || ''))}<br>
-                            <small><span class="material-icons" style="vertical-align: middle;">calendar_today</span> Ajouté le : ${p.date_prescription || 'N/A'}</small>
+                            <small><span class="material-icons" style="vertical-align: middle;">calendar_today</span> Ajouté le : ${p.date_creation || 'N/A'}</small>
                         </div>
                     `).join('');
 
@@ -371,7 +389,7 @@ $image_medecin = $_SESSION['image_medecin'] ?? 'default.jpg';
                 `);
             });
 
-            // Handle diagnostic and prescription form submissions
+            // Handle diagnostic and prescription forms
             $('.diagnostic-form, .prescription-form').on('submit', function(e) {
                 e.preventDefault();
                 const form = $(this);
@@ -385,6 +403,7 @@ $image_medecin = $_SESSION['image_medecin'] ?? 'default.jpg';
                     data: formData,
                     processData: false,
                     contentType: false,
+                    dataType: 'json',
                     success: function(response) {
                         if (response.success) {
                             $('#diagnosticModal_' + rdvId + ', #prescriptionModal_' + rdvId).modal('hide');
@@ -403,75 +422,36 @@ $image_medecin = $_SESSION['image_medecin'] ?? 'default.jpg';
                 });
             });
 
-            // Handle PDF export and email
+            // Handle PDF export
             $('.export-pdf').on('click', function() {
                 const rdvId = $(this).data('rdv');
+                const button = $(this);
+                button.prop('disabled', true).html('<span class="spinner-border spinner-border-sm"></span> Envoi en cours...');
+
                 $.ajax({
-                    url: 'generate_pdf.php',
+                    url: 'export_send_pdf.php',
                     type: 'POST',
                     data: { id_rdv: rdvId },
                     dataType: 'json',
                     success: function(response) {
+                        button.prop('disabled', false).html('<span class="material-icons">picture_as_pdf</span> Exporter & Envoyer PDF');
                         if (response.success) {
-                            // Send email with PDF
-                            $.ajax({
-                                url: 'fetch_data.php',
-                                type: 'POST',
-                                data: {
-                                    action: 'send_pdf_email',
-                                    pdf_path: response.pdf_path,
-                                    patient_email: response.patient_email,
-                                    patient_name: response.patient_name,
-                                    id_rdv: rdvId
-                                },
-                                dataType: 'json',
-                                success: function(emailResponse) {
-                                    if (emailResponse.success) {
-                                        $('#success-message').text('PDF généré et envoyé par email avec succès.');
-                                        setTimeout(() => $('#success-message').text(''), 3000);
-                                        // Clean up PDF file
-                                        $.post('fetch_data.php', { action: 'cleanup_pdf', pdf_path: response.pdf_path });
-                                    } else {
-                                        $('#error-message').text(emailResponse.error || 'Erreur lors de l\'envoi de l\'email.');
-                                    }
-                                },
-                                error: function() {
-                                    $('#error-message').text('Erreur de connexion au serveur pour l\'envoi de l\'email.');
-                                }
-                            });
+                            $('#success-message').text(response.message);
+                            $('#error-message').text('');
+                            setTimeout(() => $('#success-message').text(''), 3000);
                         } else {
-                            $('#error-message').text(response.error || 'Erreur lors de la génération du PDF.');
+                            $('#error-message').text(response.error || 'Erreur lors de l\'exportation du PDF.');
                         }
                     },
-                    error: function() {
-                        $('#error-message').text('Erreur de connexion au serveur pour la génération du PDF.');
+                    error: function(xhr, status, error) {
+                        button.prop('disabled', false).html('<span class="material-icons">picture_as_pdf</span> Exporter & Envoyer PDF');
+                        $('#error-message').text('Erreur de connexion au serveur: ' + (xhr.responseText || error));
                     }
                 });
             });
         }
 
-        function nl2br(str) {
-            return str.replace(/\n/g, '<br>');
-        }
-
-        function loadConsultations() {
-            $.ajax({
-                url: 'fetch_data.php?type=diagnostics',
-                type: 'GET',
-                dataType: 'json',
-                success: function(response) {
-                    if (response.success) {
-                        renderConsultations(response.data);
-                    } else {
-                        $('#error-message').text(response.error || 'Erreur lors du chargement des données.');
-                    }
-                },
-                error: function() {
-                    $('#error-message').text('Erreur de connexion au serveur.');
-                }
-            });
-        }
-
+        // Initial load
         $(document).ready(function() {
             loadConsultations();
         });

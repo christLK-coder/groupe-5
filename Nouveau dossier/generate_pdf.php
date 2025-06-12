@@ -1,11 +1,12 @@
 <?php
 session_start();
 error_reporting(E_ALL);
-ini_set('display_errors', 0); // Log errors, don’t display
+ini_set('display_errors', 0);
 ini_set('log_errors', 1);
 ini_set('error_log', 'D:/wamp64/logs/php_error.log');
 
 require_once 'connexion.php';
+require_once 'PHPMailer/send_email.php'; // Assure-toi que ce fichier contient bien la fonction sendPatientEmail()
 
 // Check TCPDF
 if (!file_exists('tcpdf/tcpdf.php')) {
@@ -31,12 +32,11 @@ $id_rdv = filter_var($_POST['id_rdv'], FILTER_VALIDATE_INT);
 $id_medecin = $_SESSION['id_medecin'];
 
 try {
-    // Test database connection
     if (!$pdo) {
         throw new Exception('Connexion à la base de données échouée');
     }
 
-    // Fetch consultation details
+    // Consultation info
     $stmt = $pdo->prepare("
         SELECT r.date_début, r.type_consultation, r.niveau_urgence, r.symptomes,
                p.nom AS patient_nom, p.prenom AS patient_prenom, p.email AS patient_email,
@@ -55,7 +55,7 @@ try {
         exit;
     }
 
-    // Fetch prescriptions
+    // Prescriptions
     $stmt = $pdo->prepare("
         SELECT medicament, posologie, duree, conseils, date_creation
         FROM PRESCRIPTION
@@ -64,7 +64,7 @@ try {
     $stmt->execute([$id_rdv]);
     $prescriptions = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
-    // Create PDF
+    // Création PDF
     $pdf = new TCPDF('P', 'mm', 'A4', true, 'UTF-8', false);
     $pdf->SetCreator('Dr. Christ Lemongo');
     $pdf->SetAuthor('Dr. Christ Lemongo');
@@ -72,23 +72,19 @@ try {
     $pdf->SetMargins(15, 20, 15);
     $pdf->SetAutoPageBreak(true, 15);
     $pdf->setFont('helvetica', '', 12);
-
-    // Header
-    $pdf->SetHeaderData('', 0, 'Dr. Christ Lemongo', date('d/m/Y'), [147, 214, 208], [255, 255, 255]); // #93d6d0
+    $pdf->SetHeaderData('', 0, 'Dr. Christ Lemongo', date('d/m/Y'), [147, 214, 208], [255, 255, 255]);
     $pdf->setHeaderFont(['helvetica', '', 10]);
     $pdf->setFooterFont(['helvetica', '', 8]);
     $pdf->SetHeaderMargin(10);
     $pdf->SetFooterMargin(10);
-
-    // Add page
     $pdf->AddPage();
 
-    // Title
+    // Contenu PDF
     $pdf->SetFont('helvetica', 'B', 16);
     $pdf->Cell(0, 10, 'Rapport de Consultation Médicale', 0, 1, 'C');
     $pdf->Ln(10);
 
-    // Patient Info
+    // Infos patient
     $pdf->SetFont('helvetica', 'B', 12);
     $pdf->Cell(0, 8, 'Informations du Patient', 0, 1);
     $pdf->SetFont('helvetica', '', 11);
@@ -98,7 +94,7 @@ try {
     $pdf->MultiCell(0, 6, "Niveau d’urgence: {$consultation['niveau_urgence']}", 0, 'L');
     $pdf->Ln(5);
 
-    // Symptoms
+    // Symptômes
     $pdf->SetFont('helvetica', 'B', 12);
     $pdf->Cell(0, 8, 'Symptômes', 0, 1);
     $pdf->SetFont('helvetica', '', 11);
@@ -115,7 +111,7 @@ try {
     $pdf->MultiCell(0, 6, "Posé le: $date_diag", 0, 'L');
     $pdf->Ln(5);
 
-    // Prescriptions
+    // Ordonnances
     $pdf->SetFont('helvetica', 'B', 12);
     $pdf->Cell(0, 8, 'Prescriptions', 0, 1);
     $pdf->SetFont('helvetica', '', 11);
@@ -138,16 +134,10 @@ try {
     $pdf->SetFont('helvetica', '', 11);
     $pdf->Cell(0, 8, 'Dr. Christ Lemongo, Médecin', 0, 1, 'R');
 
-    // Save PDF
+    // Sauvegarde PDF
     $unique_id = uniqid('diag_', true);
-    $pdf_path = sys_get_temp_dir() . DIRECTORY_SEPARATOR . "temp_{$unique_id}.pdf";
-    try {
-        $pdf->Output($pdf_path, 'F');
-    } catch (Exception $e) {
-        error_log("TCPDF Output Error: " . $e->getMessage());
-        echo json_encode(['success' => false, 'error' => 'Erreur lors de la création du PDF: ' . $e->getMessage()]);
-        exit;
-    }
+    $pdf_path = sys_get_temp_dir() . DIRECTORY_SEPARATOR . "rapport_consultation_{$unique_id}.pdf";
+    $pdf->Output($pdf_path, 'F');
 
     if (!file_exists($pdf_path)) {
         error_log("PDF file not created at: $pdf_path");
@@ -155,12 +145,24 @@ try {
         exit;
     }
 
-    echo json_encode(['success' => true, 'pdf_path' => $pdf_path, 'patient_email' => $consultation['patient_email'], 'patient_name' => $consultation['patient_nom'] . ' ' . $consultation['patient_prenom']]);
+    // Envoi Email avec PDF en pièce jointe
+    $patientEmail = $consultation['patient_email'];
+    $patientName = $consultation['patient_nom'] . ' ' . $consultation['patient_prenom'];
+    $subject = "Votre rapport de consultation médicale";
+    $body = "Veuillez trouver ci-joint votre rapport de consultation réalisé le " . date('d/m/Y', strtotime($consultation['date_début'])) . ".";
+
+    $emailSent = sendPatientEmail($patientEmail, $patientName, $subject, $body, $pdf_path);
+
+    if (!$emailSent) {
+        echo json_encode(['success' => false, 'error' => 'PDF créé mais erreur lors de l’envoi par email.']);
+    } else {
+        echo json_encode(['success' => true, 'message' => 'PDF généré et envoyé avec succès.']);
+    }
 } catch (PDOException $e) {
-    error_log("Database Error in generate_pdf.php: " . $e->getMessage());
+    error_log("Database Error: " . $e->getMessage());
     echo json_encode(['success' => false, 'error' => 'Erreur base de données: ' . $e->getMessage()]);
 } catch (Exception $e) {
-    error_log("General Error in generate_pdf.php: " . $e->getMessage());
-    echo json_encode(['success' => false, 'error' => 'Erreur générale: ' . $e->getMessage()]);
+    error_log("General Error: " . $e->getMessage());
+    echo json_encode(['success' => false, 'error' => 'Erreur: ' . $e->getMessage()]);
 }
 ?>
