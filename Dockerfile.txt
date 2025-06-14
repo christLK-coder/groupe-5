@@ -6,4 +6,3 @@ COPY . /var/www/html/
 
 # Ouvrir le port 80
 EXPOSE 80
-https://dashboard.render.com/web/new
